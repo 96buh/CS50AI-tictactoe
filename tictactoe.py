@@ -35,19 +35,18 @@ def player(board):
     else:
         return X
         
-    
-
 
 def actions(board):
     """
     Returns set of all possible actions (i, j) available on the board.
     """
-    legal_move = set()
+    legal_moves = set()
     for i in range(3):
         for j in range(3):
             if board[i][j] == EMPTY:
-                legal_move.add((i, j))
-    return legal_move
+                legal_moves.add((i, j))
+    return legal_moves
+
 
 def result(board, action):
     """
@@ -87,11 +86,16 @@ def terminal(board):
     """
     Returns True if game is over, False otherwise.
     """
-    for i in range(3):
-        for j in range(3):
-            if board[i][j] == None:
-                return False
-    return True
+    # X 或 O 贏了
+    if winner(board) is not None:
+        return True
+    # 如果有格子是空的
+    else:
+        for i in range(3):
+            for j in range(3):
+                if board[i][j] == EMPTY:
+                    return False
+        return True
     
 
 
@@ -114,3 +118,44 @@ def minimax(board):
     """
     if terminal(board):
         return None
+    
+    # X 是 maximizing palyer
+    if player(board) == X:
+        target = max_value(board)
+        v = -100
+        for action in actions(board):
+            v = max(v, min_value(result(board, action)))
+            if v == target:
+                optimal_move = action
+                return optimal_move
+
+    # O 是 minimizing player
+    if player(board) == O:
+        target = min_value(board)
+        v = 100
+        for action in actions(board):
+            v = min(v, max_value(result(board, action)))
+            if v == target:
+                optimal_move = action
+                return optimal_move
+        
+    
+def max_value(board):
+    v = -100
+
+    if terminal(board):
+        return utility(board)
+
+    for action in actions(board):
+        v = max(v, min_value(result(board, action)))    
+    return v
+
+def min_value(board):
+    v = 100
+
+    if terminal(board):
+        return utility(board)
+    
+    for action in actions(board):
+        v = min(v, max_value(result(board, action)))
+    return v
